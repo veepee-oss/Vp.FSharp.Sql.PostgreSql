@@ -7,8 +7,8 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Kerry Perret</Authors>
     <Company>Veepee</Company>
-    <RepositoryUrl>https://github.com/veepee-oss/Vp.FSharp</RepositoryUrl>
-    <PackageProjectUrl>https://github.com/veepee-oss/Vp.FSharp</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/veepee-oss/Vp.FSharp.Sql.PostgreSql</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/veepee-oss/Vp.FSharp.Sql.PostgreSql</PackageProjectUrl>
     <PackageDescription>F# Wrapper for PostgreSQL around Npgsql and Vp.FSharp.Sql</PackageDescription>
     <PackageId>Vp.FSharp.Sql.PostgreSql</PackageId>
     <PackageTags>Veepee,F#,fsharp,functional,SQL,PostgreSQL,Postgres,Npgsql</PackageTags>

@@ -6,9 +6,22 @@ ProjectSection(SolutionItems) = preProject
 	CONTRIBUTION.md = CONTRIBUTION.md
 	LICENSE = LICENSE
 	README.md = README.md
+	.commitlintrc.yml = .commitlintrc.yml
 EndProjectSection
 EndProject
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Vp.FSharp.Sql.PostgreSql", "Vp.FSharp.Sql.PostgreSql\Vp.FSharp.Sql.PostgreSql.fsproj", "{CA322E15-0276-42F2-A85E-7D945B459A65}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{901C1063-E4E5-4B86-B517-ED9CB1269C1F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{9217418A-4406-47F0-9354-37FB7488F859}"
+ProjectSection(SolutionItems) = preProject
+	.config\dotnet-tools.json = .config\dotnet-tools.json
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{018D077D-BA3D-4608-87A0-B3AAB5E921C9}"
+ProjectSection(SolutionItems) = preProject
+	.github\workflows\on-push.yml = .github\workflows\on-push.yml
+EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,5 +33,10 @@ Global
 		{CA322E15-0276-42F2-A85E-7D945B459A65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA322E15-0276-42F2-A85E-7D945B459A65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA322E15-0276-42F2-A85E-7D945B459A65}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{901C1063-E4E5-4B86-B517-ED9CB1269C1F} = {497728A9-77B0-49F8-AC5C-30A210BBB581}
+		{9217418A-4406-47F0-9354-37FB7488F859} = {497728A9-77B0-49F8-AC5C-30A210BBB581}
+		{018D077D-BA3D-4608-87A0-B3AAB5E921C9} = {901C1063-E4E5-4B86-B517-ED9CB1269C1F}
 	EndGlobalSection
 EndGlobal

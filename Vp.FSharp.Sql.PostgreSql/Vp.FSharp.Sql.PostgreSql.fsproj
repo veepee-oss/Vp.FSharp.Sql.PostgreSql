@@ -1,0 +1,29 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <Title>Vp.FSharp.Sql.PostgreSql</Title>
+    <Product>Vp.FSharp</Product>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <Authors>Kerry Perret</Authors>
+    <Company>Veepee</Company>
+    <RepositoryUrl>https://github.com/veepee-oss/Vp.FSharp</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/veepee-oss/Vp.FSharp</PackageProjectUrl>
+    <PackageDescription>F# Wrapper for PostgreSQL around Npgsql and Vp.FSharp.Sql</PackageDescription>
+    <PackageId>Vp.FSharp.Sql.PostgreSql</PackageId>
+    <PackageTags>Veepee,F#,fsharp,functional,SQL,PostgreSQL,Postgres,Npgsql</PackageTags>
+    <RepositoryType>git</RepositoryType>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="Library.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="4.1.4" />
+    <PackageReference Include="Vp.FSharp.Sql" Version="1.0.16" />
+  </ItemGroup>
+
+</Project>

@@ -24,6 +24,8 @@ ProjectSection(SolutionItems) = preProject
 	.github\workflows\on-release-tag-main.yml = .github\workflows\on-release-tag-main.yml
 EndProjectSection
 EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Vp.FSharp.Sql.PostgreSql.Tests", "Vp.FSharp.Sql.PostgreSql.Tests\Vp.FSharp.Sql.PostgreSql.Tests.fsproj", "{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,10 @@ Global
 		{CA322E15-0276-42F2-A85E-7D945B459A65}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CA322E15-0276-42F2-A85E-7D945B459A65}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CA322E15-0276-42F2-A85E-7D945B459A65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{901C1063-E4E5-4B86-B517-ED9CB1269C1F} = {497728A9-77B0-49F8-AC5C-30A210BBB581}

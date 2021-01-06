@@ -5,6 +5,7 @@ open System.Net
 open System.Collections.Generic
 open System.Net.NetworkInformation
 
+open System.Threading.Tasks
 open Npgsql
 open NpgsqlTypes
 
@@ -75,7 +76,9 @@ type PostgreSqlDbValue =
     /// See: https://www.npgsql.org/doc/types/enums_and_composites.html
     | Enum of Enum
 
-type PostgreSqlCommandDefinition = CommandDefinition<NpgsqlConnection, NpgsqlParameter, PostgreSqlDbValue>
+type PostgreSqlCommandDefinition = CommandDefinition<NpgsqlConnection, NpgsqlTransaction, NpgsqlCommand, NpgsqlParameter, NpgsqlDataReader, PostgreSqlDbValue>
+
+type PostgreSqlDeps = SqlDeps<NpgsqlConnection, NpgsqlTransaction, NpgsqlCommand, NpgsqlParameter, NpgsqlDataReader, PostgreSqlDbValue>
 
 [<RequireQualifiedAccess>]
 module PostgreSqlCommand =
@@ -228,6 +231,12 @@ module PostgreSqlCommand =
             parameter.Value <- value
         parameter
 
+    let private deps : PostgreSqlDeps =
+        { CreateCommand = (fun c -> new NpgsqlCommand("", c))
+          ExecuteReaderAsync = (fun cmd -> cmd.ExecuteReader() |> Task.FromResult )
+          DbValueToParameter = dbValueToParameter
+          GlobalLogger = None }
+
     /// Initialize a command definition with the given text contained in the given string.
     let text value : PostgreSqlCommandDefinition =
         SqlCommand.text value
@@ -262,43 +271,37 @@ module PostgreSqlCommand =
 
     /// Return the sets of rows as an AsyncSeq accordingly to the command definition.
     let queryAsyncSeq connection read (commandDefinition: PostgreSqlCommandDefinition) =
-        SqlCommand.queryAsyncSeq connection dbValueToParameter read commandDefinition
+        SqlCommand.queryAsyncSeq connection deps read commandDefinition
 
     /// Return the sets of rows as a list accordingly to the command definition.
     let queryList connection read (commandDefinition: PostgreSqlCommandDefinition) =
-        SqlCommand.queryList connection dbValueToParameter read commandDefinition
+        SqlCommand.queryList connection deps read commandDefinition
 
     /// Return the first set of rows as a list accordingly to the command definition.
     let querySetList connection read (commandDefinition: PostgreSqlCommandDefinition) =
-        SqlCommand.querySetList connection dbValueToParameter read commandDefinition
+        SqlCommand.querySetList connection deps read commandDefinition
 
     /// Return the 2 first sets of rows as a tuple of 2 lists accordingly to the command definition.
     let querySetList2 connection read1 read2 (commandDefinition: PostgreSqlCommandDefinition) =
-        SqlCommand.querySetList2 connection dbValueToParameter read1 read2 commandDefinition
+        SqlCommand.querySetList2 connection deps read1 read2 commandDefinition
 
     /// Return the 3 first sets of rows as a tuple of 3 lists accordingly to the command definition.
     let querySetList3 connection read1 read2 read3 (commandDefinition: PostgreSqlCommandDefinition) =
-        SqlCommand.querySetList3 connection dbValueToParameter read1 read2 read3 commandDefinition
+        SqlCommand.querySetList3 connection deps read1 read2 read3 commandDefinition
 
     /// Execute the command accordingly to its definition and,
     /// - return the first cell value, if it is available and of the given type.
     /// - throw an exception, otherwise.
     let executeScalar<'Scalar> connection (commandDefinition: PostgreSqlCommandDefinition) =
-        SqlCommand.executeScalar<'Scalar, _, _, _>
-            connection
-            dbValueToParameter
-            commandDefinition
+        SqlCommand.executeScalar<'Scalar, _, _ ,_ ,_ ,_ ,_, _, _, _> connection deps commandDefinition
 
     /// Execute the command accordingly to its definition and,
     /// - return Some, if the first cell is available and of the given type.
     /// - return None, if first cell is DbNull.
     /// - throw an exception, otherwise.
     let executeScalarOrNone<'Scalar> connection (commandDefinition: PostgreSqlCommandDefinition) =
-        SqlCommand.executeScalarOrNone<'Scalar, _, _, _>
-            connection
-            dbValueToParameter
-            commandDefinition
+        SqlCommand.executeScalarOrNone<'Scalar, _, _ ,_ ,_ ,_ ,_, _, _, _> connection deps commandDefinition
 
     /// Execute the command accordingly to its definition and, return the number of rows affected.
     let executeNonQuery connection (commandDefinition: PostgreSqlCommandDefinition) =
-        SqlCommand.executeNonQuery connection dbValueToParameter commandDefinition
+        SqlCommand.executeNonQuery connection deps commandDefinition

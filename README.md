@@ -25,6 +25,10 @@ TBD    | [![Semantic Release](https://img.shields.io/badge/Semantic%20Release-17
  Name                       | Version  | Command |
 --------------------------- | -------- | ------- |
  `Vp.FSharp.Sql.PostgreSql` | [![NuGet Status](http://img.shields.io/nuget/v/Vp.FSharp.Sql.PostgreSql.svg)](https://www.nuget.org/packages/Vp.FSharp.Sql.PostgreSql) | `Install-Package Vp.FSharp.Sql.PostgreSql`
+
+
+# How to use this library?
+
 # How to Contribute
 Bug reports, feature requests, and pull requests are very welcome! Please read the [Contribution Guidelines](./CONTRIBUTION.md) to get started.
 

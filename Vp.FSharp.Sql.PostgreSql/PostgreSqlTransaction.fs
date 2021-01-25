@@ -1,5 +1,5 @@
 ﻿[<RequireQualifiedAccess>]
-module Vp.FSharp.Sql.SqlServer.PostgreSqlTransaction
+module Vp.FSharp.Sql.PostgreSql.PostgreSqlTransaction
 
 open Vp.FSharp.Sql
 open Vp.FSharp.Sql.PostgreSql

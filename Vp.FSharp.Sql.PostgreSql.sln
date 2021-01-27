@@ -1,30 +1,35 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30907.101
+MinimumVisualStudioVersion = 15.0.26124.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{497728A9-77B0-49F8-AC5C-30A210BBB581}"
-ProjectSection(SolutionItems) = preProject
-	.gitignore = .gitignore
-	CONTRIBUTION.md = CONTRIBUTION.md
-	LICENSE = LICENSE
-	README.md = README.md
-	.commitlintrc.yml = .commitlintrc.yml
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		.commitlintrc.yml = .commitlintrc.yml
+		.gitignore = .gitignore
+		CONTRIBUTION.md = CONTRIBUTION.md
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Vp.FSharp.Sql.PostgreSql", "Vp.FSharp.Sql.PostgreSql\Vp.FSharp.Sql.PostgreSql.fsproj", "{CA322E15-0276-42F2-A85E-7D945B459A65}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Vp.FSharp.Sql.PostgreSql", "Vp.FSharp.Sql.PostgreSql\Vp.FSharp.Sql.PostgreSql.fsproj", "{CA322E15-0276-42F2-A85E-7D945B459A65}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{901C1063-E4E5-4B86-B517-ED9CB1269C1F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".config", ".config", "{9217418A-4406-47F0-9354-37FB7488F859}"
-ProjectSection(SolutionItems) = preProject
-	.config\dotnet-tools.json = .config\dotnet-tools.json
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		.config\dotnet-tools.json = .config\dotnet-tools.json
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{018D077D-BA3D-4608-87A0-B3AAB5E921C9}"
-ProjectSection(SolutionItems) = preProject
-	.github\workflows\on-push.yml = .github\workflows\on-push.yml
-	.github\workflows\on-release-tag-main.yml = .github\workflows\on-release-tag-main.yml
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\on-push.yml = .github\workflows\on-push.yml
+		.github\workflows\on-release-tag-main.yml = .github\workflows\on-release-tag-main.yml
+	EndProjectSection
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Vp.FSharp.Sql.PostgreSql.Tests", "Vp.FSharp.Sql.PostgreSql.Tests\Vp.FSharp.Sql.PostgreSql.Tests.fsproj", "{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}"
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Vp.FSharp.Sql.PostgreSql.Tests", "Vp.FSharp.Sql.PostgreSql.Tests\Vp.FSharp.Sql.PostgreSql.Tests.fsproj", "{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}"
+EndProject
+Project("{6EC3EE1D-3C4E-46DD-8F32-0CC8E7565705}") = "Samples", "Samples\Samples.fsproj", "{F6296AB7-3D97-4898-93D7-ECFAE45D1893}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,10 +45,20 @@ Global
 		{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1F8D6A4D-93CB-4A7E-8337-3ECD9B8C15DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F6296AB7-3D97-4898-93D7-ECFAE45D1893}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F6296AB7-3D97-4898-93D7-ECFAE45D1893}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F6296AB7-3D97-4898-93D7-ECFAE45D1893}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F6296AB7-3D97-4898-93D7-ECFAE45D1893}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{901C1063-E4E5-4B86-B517-ED9CB1269C1F} = {497728A9-77B0-49F8-AC5C-30A210BBB581}
 		{9217418A-4406-47F0-9354-37FB7488F859} = {497728A9-77B0-49F8-AC5C-30A210BBB581}
 		{018D077D-BA3D-4608-87A0-B3AAB5E921C9} = {901C1063-E4E5-4B86-B517-ED9CB1269C1F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {44104778-10AB-4BA5-9105-132CC8E9B241}
 	EndGlobalSection
 EndGlobal

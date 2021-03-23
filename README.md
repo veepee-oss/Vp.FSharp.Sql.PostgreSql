@@ -1,8 +1,6 @@
 # Vp.FSharp.Sql.PostgreSql
 
-The library providing specific native DB types definition for PostgreSQL and
-relying on [`Npsql`](https://www.npgsql.org) and
-providing a DB-specific module `PostgreSql`.
+An opinionated F# library to interact with PostgreSQL databases following [`Vp.FSharp.Sql`](https://github.com/veepee-oss/Vp.FSharp.Sql) principles and relying on [`Npsql`](https://www.npgsql.org).
 
 ## Slagging Hype
 

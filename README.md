@@ -117,7 +117,7 @@ Example:
 ```fsharp
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 PostgreSqlCommand.text "SELECT 42;"
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -140,14 +140,14 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 [ 0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55; ]
 |> List.map (sprintf "SELECT %d;")
 |> PostgreSqlCommand.textFromList
-|> PostgreSqlCommand.queryList connection (fun _ _ read -> read.Value<int64> 0)
+|> PostgreSqlCommand.queryList connection (fun _ _ read -> read.Value<int32> 0)
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
 
 Output:
 ```txt
-[0L; 1L; 1L; 2L; 3L; 5L; 8L; 13L; 21L; 34L; 55L]
+[0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55]
 ```
 
 </details>
@@ -165,7 +165,7 @@ PostgreSqlConfiguration.Logger (printfn "Logging... %A")
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 PostgreSqlCommand.text "SELECT 42;"
 |> PostgreSqlCommand.noLogger
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -190,17 +190,17 @@ PostgreSqlConfiguration.NoLogger ()
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 PostgreSqlCommand.text "SELECT 42;"
 |> PostgreSqlCommand.overrideLogger (printfn "Logging... %A")
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
 
 Output:
 ```fsharp
-Logging... ConnectionOpened System.Data.PostgreSql.NpgsqlConnection
-Logging... CommandPrepared System.Data.PostgreSql.PostgreSqlCommand
-Logging... CommandExecuted (System.Data.PostgreSql.PostgreSqlCommand, 00:00:00.0271871)
-Logging... ConnectionClosed (System.Data.PostgreSql.NpgsqlConnection, 00:00:00.1197869)
+Logging... ConnectionOpened Npgsql.NpgsqlConnection
+Logging... CommandPrepared Npgsql.NpgsqlCommand
+Logging... CommandExecuted (Npgsql.NpgsqlCommand, 00:00:00.0271871)
+Logging... ConnectionClosed (Npgsql.NpgsqlConnection, 00:00:00.1197869)
 42L
 ```
 </details>
@@ -214,7 +214,7 @@ Example:
 ```fsharp
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 PostgreSqlCommand.text "SELECT @a + @b;"
-|> PostgreSqlCommand.parameters [ ("a", Integer 42L); ("b", Real 42.42) ]
+|> PostgreSqlCommand.parameters [ ("a", Integer 42L); ("b", Real 42.42f) ]
 |> PostgreSqlCommand.executeScalar<double> connection
 |> Async.RunSynchronously
 |> printfn "%A"
@@ -240,7 +240,7 @@ try
     use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
     PostgreSqlCommand.text "SELECT 42;"
     |> PostgreSqlCommand.cancellationToken (CancellationToken(true))
-    |> PostgreSqlCommand.executeScalar<int64> connection
+    |> PostgreSqlCommand.executeScalar<int32> connection
     |> Async.RunSynchronously
     |> ignore
 with
@@ -305,7 +305,7 @@ PostgreSqlCommand.text $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOIN
 // The table is created here
 PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.transaction transaction
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 
@@ -313,7 +313,7 @@ transaction.Rollback()
 
 // The table creation has been rollbacked
 PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -350,7 +350,7 @@ let getCounterQuery n =
         """ n
 
 let readRow set record (read: SqlRecordReader<_>) =
-    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int64>) }
+    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int32>) }
 
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 [ 0; 1; 1; 2; 3; 5 ]
@@ -363,19 +363,19 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 
 Output 1:
 ```txt
-Set = 0; Row = 0; Data = [1L]
-Set = 1; Row = 0; Data = [1L]
-Set = 2; Row = 0; Data = [1L]
-Set = 3; Row = 0; Data = [1L]
-Set = 3; Row = 1; Data = [2L]
-Set = 4; Row = 0; Data = [1L]
-Set = 4; Row = 1; Data = [2L]
-Set = 4; Row = 2; Data = [3L]
-Set = 5; Row = 0; Data = [1L]
-Set = 5; Row = 1; Data = [2L]
-Set = 5; Row = 2; Data = [3L]
-Set = 5; Row = 3; Data = [4L]
-Set = 5; Row = 4; Data = [5L]
+Set = 0; Row = 0; Data = [1]
+Set = 1; Row = 0; Data = [1]
+Set = 2; Row = 0; Data = [1]
+Set = 3; Row = 0; Data = [1]
+Set = 3; Row = 1; Data = [2]
+Set = 4; Row = 0; Data = [1]
+Set = 4; Row = 1; Data = [2]
+Set = 4; Row = 2; Data = [3]
+Set = 5; Row = 0; Data = [1]
+Set = 5; Row = 1; Data = [2]
+Set = 5; Row = 2; Data = [3]
+Set = 5; Row = 3; Data = [4]
+Set = 5; Row = 4; Data = [5]
 ```
 
 Notes 📝:
@@ -391,14 +391,14 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 [ 0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55; ]
 |> List.map (sprintf "SELECT %d AS cola;")
 |> PostgreSqlCommand.textFromList
-|> PostgreSqlCommand.queryList connection (fun _ _ read -> read.Value<int64> "cola")
+|> PostgreSqlCommand.queryList connection (fun _ _ read -> read.Value<int32> "cola")
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
 
 Output 2:
 ```txt
-[0L; 1L; 1L; 2L; 3L; 5L; 8L; 13L; 21L; 34L; 55L]
+[0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55]
 ```
 
 </details>
@@ -422,7 +422,7 @@ let getCounterQuery n =
         """ n
 
 let readRow set record (read: SqlRecordReader<_>) =
-    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int64>) }
+    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int32>) }
 
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 [ 0; 1; 1; 2; 3; 5 ]
@@ -434,19 +434,19 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 
 Output 1:
 ```txt
-Set = 0; Row = 0; Data = [1L]
-Set = 1; Row = 0; Data = [1L]
-Set = 2; Row = 0; Data = [1L]
-Set = 3; Row = 0; Data = [1L]
-Set = 3; Row = 1; Data = [2L]
-Set = 4; Row = 0; Data = [1L]
-Set = 4; Row = 1; Data = [2L]
-Set = 4; Row = 2; Data = [3L]
-Set = 5; Row = 0; Data = [1L]
-Set = 5; Row = 1; Data = [2L]
-Set = 5; Row = 2; Data = [3L]
-Set = 5; Row = 3; Data = [4L]
-Set = 5; Row = 4; Data = [5L]
+Set = 0; Row = 0; Data = [1]
+Set = 1; Row = 0; Data = [1]
+Set = 2; Row = 0; Data = [1]
+Set = 3; Row = 0; Data = [1]
+Set = 3; Row = 1; Data = [2]
+Set = 4; Row = 0; Data = [1]
+Set = 4; Row = 1; Data = [2]
+Set = 4; Row = 2; Data = [3]
+Set = 5; Row = 0; Data = [1]
+Set = 5; Row = 1; Data = [2]
+Set = 5; Row = 2; Data = [3]
+Set = 5; Row = 3; Data = [4]
+Set = 5; Row = 4; Data = [5]
 ```
 
 Notes 📝:
@@ -462,14 +462,14 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 [ 0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55; ]
 |> List.map (sprintf "SELECT %d AS cola;")
 |> PostgreSqlCommand.textFromList
-|> PostgreSqlCommand.queryList connection (fun _ _ read -> read.Value<int64> "cola")
+|> PostgreSqlCommand.queryList connection (fun _ _ read -> read.Value<int32> "cola")
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
 
 Output 2:
 ```txt
-[0L; 1L; 1L; 2L; 3L; 5L; 8L; 13L; 21L; 34L; 55L]
+[0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55]
 ```
 
 </details>
@@ -487,14 +487,14 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 [ 0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55; ]
 |> List.map (sprintf "SELECT %d;")
 |> PostgreSqlCommand.textFromList
-|> PostgreSqlCommand.queryList connection (fun _ _ read -> read.Value<int64> 0)
+|> PostgreSqlCommand.queryList connection (fun _ _ read -> read.Value<int32> 0)
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
 
 Output:
 ```txt
-[0L; 1L; 1L; 2L; 3L; 5L; 8L; 13L; 21L; 34L; 55L]
+[0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55]
 ```
 
 </details>
@@ -512,13 +512,13 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 [ 0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55; ]
 |> List.map (sprintf "SELECT %d;")
 |> PostgreSqlCommand.textFromList
-|> PostgreSqlCommand.queryListSync connection (fun _ _ read -> read.Value<int64> 0)
+|> PostgreSqlCommand.queryListSync connection (fun _ _ read -> read.Value<int32> 0)
 |> printfn "%A"
 ```
 
 Output:
 ```txt
-[0L; 1L; 1L; 2L; 3L; 5L; 8L; 13L; 21L; 34L; 55L]
+[0; 1; 1; 2; 3; 5; 8; 13; 21; 34; 55]
 ```
 
 </details>
@@ -535,7 +535,7 @@ Example:
 type Row<'T> = { Set: int32; Record: int32; Data: 'T list }
 
 let readRow set record (read: SqlRecordReader<_>)  =
-    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int64>) }
+    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int32>) }
 
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 [ 0; 1; 1; 2; 3; 5 ]
@@ -548,7 +548,7 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 
 Output:
 ```txt
-Set = 1; Row = 0; Data = [0L]
+Set = 1; Row = 0; Data = [0]
 ```
 
 </details>
@@ -565,7 +565,7 @@ Example:
 type Row<'T> = { Set: int32; Record: int32; Data: 'T list }
 
 let readRow set record (read: SqlRecordReader<_>)  =
-    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int64>) }
+    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int32>) }
 
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 [ 0; 1; 1; 2; 3; 5 ]
@@ -577,7 +577,7 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 
 Output:
 ```txt
-Set = 1; Row = 0; Data = [0L]
+Set = 1; Row = 0; Data = [0]
 ```
 
 </details>
@@ -594,7 +594,7 @@ Example:
 type Row<'T> = { Set: int32; Record: int32; Data: 'T list }
 
 let readRow set record (read: SqlRecordReader<_>)  =
-    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int64>) }
+    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int32>) }
 
 let printRow row = printfn "Set = %A; Row = %A; Data = %A" row.Set row.Record row.Data
 
@@ -612,8 +612,8 @@ List.iter printRow set2
 
 Output:
 ```txt
-Set = 1; Row = 0; Data = [0L]
-Set = 2; Row = 0; Data = [1L]
+Set = 1; Row = 0; Data = [0]
+Set = 2; Row = 0; Data = [1]
 ```
 
 </details>
@@ -630,7 +630,7 @@ Example:
 type Row<'T> = { Set: int32; Record: int32; Data: 'T list }
 
 let readRow set record (read: SqlRecordReader<_>)  =
-    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int64>) }
+    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int32>) }
 
 let printRow row = printfn "Set = %A; Row = %A; Data = %A" row.Set row.Record row.Data
 
@@ -647,8 +647,8 @@ List.iter printRow set2
 
 Output:
 ```txt
-Set = 1; Row = 0; Data = [0L]
-Set = 2; Row = 0; Data = [1L]
+Set = 1; Row = 0; Data = [0]
+Set = 2; Row = 0; Data = [1]
 ```
 
 </details>
@@ -665,7 +665,7 @@ Example:
 type Row<'T> = { Set: int32; Record: int32; Data: 'T list }
 
 let readRow set record (read: SqlRecordReader<_>)  =
-    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int64>) }
+    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int32>) }
 
 let printRow row = printfn "Set = %A; Row = %A; Data = %A" row.Set row.Record row.Data
 
@@ -684,9 +684,9 @@ List.iter printRow set3
 
 Output:
 ```txt
-Set = 1; Row = 0; Data = [0L]
-Set = 2; Row = 0; Data = [1L]
-Set = 3; Row = 0; Data = [1L]
+Set = 1; Row = 0; Data = [0]
+Set = 2; Row = 0; Data = [1]
+Set = 3; Row = 0; Data = [1]
 ```
 
 </details>
@@ -703,7 +703,7 @@ Example:
 type Row<'T> = { Set: int32; Record: int32; Data: 'T list }
 
 let readRow set record (read: SqlRecordReader<_>)  =
-    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int64>) }
+    { Set = set; Record = record; Data = List.init (read.Count) (read.Value<int32>) }
 
 let printRow row = printfn "Set = %A; Row = %A; Data = %A" row.Set row.Record row.Data
 
@@ -721,9 +721,9 @@ List.iter printRow set3
 
 Output:
 ```txt
-Set = 1; Row = 0; Data = [0L]
-Set = 2; Row = 0; Data = [1L]
-Set = 3; Row = 0; Data = [1L]
+Set = 1; Row = 0; Data = [0]
+Set = 2; Row = 0; Data = [1]
+Set = 3; Row = 0; Data = [1]
 ```
 
 </details>
@@ -741,7 +741,7 @@ Example:
 ```fsharp
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 PostgreSqlCommand.text "SELECT 42;"
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -767,7 +767,7 @@ Example:
 ```fsharp
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 PostgreSqlCommand.text "SELECT 42;"
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -793,12 +793,12 @@ Example:
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 
 PostgreSqlCommand.text "SELECT 42;"
-|> PostgreSqlCommand.executeScalarOrNone<int64> connection
+|> PostgreSqlCommand.executeScalarOrNone<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 
-PostgreSqlCommand.text "SELECT NULL;"
-|> PostgreSqlCommand.executeScalarOrNone<int64> connection
+PostgreSqlCommand.text "SELECT NUL;"
+|> PostgreSqlCommand.executeScalarOrNone<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 0
@@ -827,11 +827,11 @@ Example:
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 
 PostgreSqlCommand.text "SELECT 42;"
-|> PostgreSqlCommand.executeScalarOrNoneSync<int64> connection
+|> PostgreSqlCommand.executeScalarOrNoneSync<int32> connection
 |> printfn "%A"
 
-PostgreSqlCommand.text "SELECT NULL;"
-|> PostgreSqlCommand.executeScalarOrNoneSync<int64> connection
+PostgreSqlCommand.text "SELECT NUL;"
+|> PostgreSqlCommand.executeScalarOrNoneSync<int32> connection
 |> printfn "%A"
 0
 ```
@@ -959,14 +959,14 @@ PostgreSqlTransaction.commit (CancellationToken.None) (IsolationLevel.ReadCommit
 
     return!
         PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
 })
 |> Async.RunSynchronously
 |> printfn "%A"
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1000,13 +1000,13 @@ PostgreSqlTransaction.commitSync (IsolationLevel.ReadCommitted) connection (fun 
     |> ignore
 
     PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
 )
 |> printfn "%A"
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1041,14 +1041,14 @@ PostgreSqlTransaction.notCommit (CancellationToken.None) (IsolationLevel.ReadCom
     return!
         $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
         |> PostgreSqlCommand.text
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
 })
 |> Async.RunSynchronously
 |> printfn "%A"
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1083,13 +1083,13 @@ PostgreSqlTransaction.notCommitSync (IsolationLevel.ReadCommitted) connection (f
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
     |> PostgreSqlCommand.text
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
 )
 |> printfn "%A"
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1125,7 +1125,7 @@ PostgreSqlTransaction.commitOnSome (CancellationToken.None) (IsolationLevel.Read
 
     do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
         |> PostgreSqlCommand.text
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
     return Some 42
 })
@@ -1134,7 +1134,7 @@ PostgreSqlTransaction.commitOnSome (CancellationToken.None) (IsolationLevel.Read
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1160,7 +1160,7 @@ PostgreSqlTransaction.commitOnSome (CancellationToken.None) (IsolationLevel.Read
 
     do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';" 
         |> PostgreSqlCommand.text 
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
     return None
 })
@@ -1169,7 +1169,7 @@ PostgreSqlTransaction.commitOnSome (CancellationToken.None) (IsolationLevel.Read
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1206,7 +1206,7 @@ PostgreSqlTransaction.commitOnSomeSync (IsolationLevel.ReadCommitted) connection
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
     |> PostgreSqlCommand.text
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
     return Some 42
 )
@@ -1214,7 +1214,7 @@ PostgreSqlTransaction.commitOnSomeSync (IsolationLevel.ReadCommitted) connection
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1239,7 +1239,7 @@ PostgreSqlTransaction.commitOnSomeSync (IsolationLevel.ReadCommitted) connection
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';" 
     |> PostgreSqlCommand.text 
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
     return None
 )
@@ -1247,7 +1247,7 @@ PostgreSqlTransaction.commitOnSomeSync (IsolationLevel.ReadCommitted) connection
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1283,7 +1283,7 @@ PostgreSqlTransaction.commitOnOk (CancellationToken.None) (IsolationLevel.ReadCo
 
     do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
         |> PostgreSqlCommand.text 
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
     return Ok 42
 })
@@ -1292,7 +1292,7 @@ PostgreSqlTransaction.commitOnOk (CancellationToken.None) (IsolationLevel.ReadCo
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1318,7 +1318,7 @@ PostgreSqlTransaction.commitOnOk (CancellationToken.None) (IsolationLevel.ReadCo
 
     do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
         |> PostgreSqlCommand.text
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
     return Error "fail"
 })
@@ -1327,7 +1327,7 @@ PostgreSqlTransaction.commitOnOk (CancellationToken.None) (IsolationLevel.ReadCo
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1364,7 +1364,7 @@ PostgreSqlTransaction.commitOnOkSync (IsolationLevel.ReadCommitted) connection (
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
     |> PostgreSqlCommand.text 
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
     return Ok 42
 )
@@ -1372,7 +1372,7 @@ PostgreSqlTransaction.commitOnOkSync (IsolationLevel.ReadCommitted) connection (
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1397,7 +1397,7 @@ PostgreSqlTransaction.commitOnOkSync (IsolationLevel.ReadCommitted) connection (
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
     |> PostgreSqlCommand.text
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
     return Error "fail"
 )
@@ -1405,7 +1405,7 @@ PostgreSqlTransaction.commitOnOkSync (IsolationLevel.ReadCommitted) connection (
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1439,14 +1439,14 @@ PostgreSqlTransaction.defaultCommit connection (fun connection _ -> async {
 
     return!
         PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
 })
 |> Async.RunSynchronously
 |> printfn "%A"
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1480,13 +1480,13 @@ PostgreSqlTransaction.defaultCommitSync connection (fun connection _ ->
     |> ignore
 
     PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
 )
 |> printfn "%A"
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1521,14 +1521,14 @@ PostgreSqlTransaction.defaultNotCommit connection (fun connection _ -> async {
     return!
         $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
         |> PostgreSqlCommand.text
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
 })
 |> Async.RunSynchronously
 |> printfn "%A"
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1563,13 +1563,13 @@ PostgreSqlTransaction.defaultNotCommitSync connection (fun connection _ ->
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
     |> PostgreSqlCommand.text
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
 )
 |> printfn "%A"
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1605,7 +1605,7 @@ PostgreSqlTransaction.defaultCommitOnSome connection (fun connection _ -> async 
 
     do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
         |> PostgreSqlCommand.text
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
     return Some 42
 })
@@ -1614,7 +1614,7 @@ PostgreSqlTransaction.defaultCommitOnSome connection (fun connection _ -> async 
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1640,7 +1640,7 @@ PostgreSqlTransaction.defaultCommitOnSome connection (fun connection _ -> async 
 
     do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';" 
         |> PostgreSqlCommand.text 
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
     return None
 })
@@ -1649,7 +1649,7 @@ PostgreSqlTransaction.defaultCommitOnSome connection (fun connection _ -> async 
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1686,7 +1686,7 @@ PostgreSqlTransaction.defaultCommitOnSomeSync connection (fun connection _ ->
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
     |> PostgreSqlCommand.text
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
     return Some 42
 )
@@ -1694,7 +1694,7 @@ PostgreSqlTransaction.defaultCommitOnSomeSync connection (fun connection _ ->
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1719,7 +1719,7 @@ PostgreSqlTransaction.defaultCommitOnSomeSync connection (fun connection _ ->
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';" 
     |> PostgreSqlCommand.text 
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
     return None
 )
@@ -1727,7 +1727,7 @@ PostgreSqlTransaction.defaultCommitOnSomeSync connection (fun connection _ ->
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1763,7 +1763,7 @@ PostgreSqlTransaction.defaultCommitOnOk connection (fun connection _ -> async {
 
     do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
         |> PostgreSqlCommand.text 
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
     return Ok 42
 })
@@ -1772,7 +1772,7 @@ PostgreSqlTransaction.defaultCommitOnOk connection (fun connection _ -> async {
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1798,7 +1798,7 @@ PostgreSqlTransaction.defaultCommitOnOk connection (fun connection _ -> async {
 
     do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
         |> PostgreSqlCommand.text
-        |> PostgreSqlCommand.executeScalar<int64> connection
+        |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
     return Error "fail"
 })
@@ -1807,7 +1807,7 @@ PostgreSqlTransaction.defaultCommitOnOk connection (fun connection _ -> async {
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalar<int64> connection
+|> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
 ```
@@ -1844,7 +1844,7 @@ PostgreSqlTransaction.defaultCommitOnOkSync connection (fun connection _ ->
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
     |> PostgreSqlCommand.text 
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
     return Ok 42
 )
@@ -1852,7 +1852,7 @@ PostgreSqlTransaction.defaultCommitOnOkSync connection (fun connection _ ->
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 
@@ -1877,7 +1877,7 @@ PostgreSqlTransaction.defaultCommitOnOkSync connection (fun connection _ ->
 
     $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
     |> PostgreSqlCommand.text
-    |> PostgreSqlCommand.executeScalarSync<int64> connection
+    |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
     return Error "fail"
 )
@@ -1885,7 +1885,7 @@ PostgreSqlTransaction.defaultCommitOnOkSync connection (fun connection _ ->
 
 $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
 |> PostgreSqlCommand.text 
-|> PostgreSqlCommand.executeScalarSync<int64> connection
+|> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
 ```
 

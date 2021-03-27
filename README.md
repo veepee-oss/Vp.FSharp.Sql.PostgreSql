@@ -100,11 +100,11 @@ type PostgreSqlDbValue =
 
 ## 🧱`PostgreSqlCommand`
 
-The main module is here to help you build and execute SQL(ite) commands (i.e. `PostgreSqlCommand` BTS).
+The main module is here to help you build and execute (Postgre)SQL commands (i.e. `PostgreSqlCommand` BTS).
 
 ### 🏗️ Command Construction
 
-We are obviously going to talk about how to build the PostgreSql commands.
+We are obviously going to talk about how to build PostgreSQL commands.
 
 📝 Note: the meaning of the word "update" below has to be put in a F# perspective, i.e. **immutable** update, as in the update returns a new updated and immutable instance.
 
@@ -329,7 +329,7 @@ Output:
 
 ### ⚙ Command Execution
 
-We are obviously going to talk about how to build the PostgreSql commands.
+We are obviously going to talk about how to execute PostgreSql commands.
 
 <details> 
 <summary><code>queryAsyncSeq</code></summary>

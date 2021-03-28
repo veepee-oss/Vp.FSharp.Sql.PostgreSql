@@ -100,7 +100,7 @@ type PostgreSqlDbValue =
 
 ## 🧱`PostgreSqlCommand`
 
-The main module is here to help you build and execute (Postgre)SQL commands (i.e. `PostgreSqlCommand` BTS).
+The main module is here to help you build and execute (Postgre)SQL commands (i.e. `NpgsqlCommand` BTS).
 
 ### 🏗️ Command Construction
 

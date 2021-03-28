@@ -4,7 +4,6 @@ module Vp.FSharp.Sql.PostgreSql.PostgreSqlCommand
 open Vp.FSharp.Sql
 
 
-
 /// Initialize a new command definition with the given text contained in the given string.
 let text value : PostgreSqlCommandDefinition =
     SqlCommand.text value

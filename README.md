@@ -1,6 +1,6 @@
 # Vp.FSharp.Sql.PostgreSql
 
-An opinionated F# library to interact with PostgreSQL databases following [`Vp.FSharp.Sql`](https://github.com/veepee-oss/Vp.FSharp.Sql) principles and relying on [`Npsql`](https://www.npgsql.org).
+An opinionated F# library to interact with PostgreSQL databases following [`Vp.FSharp.Sql`](https://github.com/veepee-oss/Vp.FSharp.Sql) principles and relying on [`Npsql`](https://www.nuget.org/packages/Npgsql).
 
 # ✨ Slagging Hype
 

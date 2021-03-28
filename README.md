@@ -104,7 +104,7 @@ The main module is here to help you build and execute (Postgre)SQL commands (i.e
 
 ### 🏗️ Command Construction
 
-We are obviously going to talk about how to build PostgreSQL commands.
+We are obviously going to talk about how to build `NpgsqlCommand` definitions.
 
 📝 Note: the meaning of the word "update" below has to be put in a F# perspective, i.e. **immutable** update, as in the update returns a new updated and immutable instance.
 
@@ -124,7 +124,7 @@ PostgreSqlCommand.text "SELECT 42;"
 
 Output:
 ```txt
-42L
+42
 ```
 
 </details>
@@ -172,7 +172,7 @@ PostgreSqlCommand.text "SELECT 42;"
 
 Output:
 ```txt
-42L
+42
 ```
 
 </details>
@@ -199,9 +199,9 @@ Output:
 ```fsharp
 Logging... ConnectionOpened Npgsql.NpgsqlConnection
 Logging... CommandPrepared Npgsql.NpgsqlCommand
-Logging... CommandExecuted (Npgsql.NpgsqlCommand, 00:00:00.0271871)
-Logging... ConnectionClosed (Npgsql.NpgsqlConnection, 00:00:00.1197869)
-42L
+Logging... CommandExecuted (Npgsql.NpgsqlCommand, 00:00:00.0162810)
+Logging... ConnectionClosed (Npgsql.NpgsqlConnection, 00:00:00.1007513)
+42
 ```
 </details>
 
@@ -214,7 +214,7 @@ Example:
 ```fsharp
 use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User ID=postgres;")
 PostgreSqlCommand.text "SELECT @a + @b;"
-|> PostgreSqlCommand.parameters [ ("a", Integer 42L); ("b", Real 42.42f) ]
+|> PostgreSqlCommand.parameters [ ("a", Integer 42); ("b", Real 42.42f) ]
 |> PostgreSqlCommand.executeScalar<double> connection
 |> Async.RunSynchronously
 |> printfn "%A"
@@ -222,7 +222,7 @@ PostgreSqlCommand.text "SELECT @a + @b;"
 
 Output:
 ```txt
-84.42
+84.0
 ```
 
 </details>
@@ -296,14 +296,14 @@ connection.Open()
 use transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted)
 
 // Create a table
-PostgreSqlCommand.text $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+PostgreSqlCommand.text $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
 |> PostgreSqlCommand.transaction transaction
 |> PostgreSqlCommand.executeNonQuery connection
 |> Async.RunSynchronously
 |> printfn "%A"
 
 // The table is created here
-PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+PostgreSqlCommand.text $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.transaction transaction
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -312,7 +312,7 @@ PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='tabl
 transaction.Rollback()
 
 // The table creation has been rollbacked
-PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+PostgreSqlCommand.text $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
 |> printfn "%A"
@@ -320,16 +320,16 @@ PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='tabl
 
 Output:
 ```txt
+-1
+1
 0
-1L
-0L
 ```
 
 </details>
 
 ### ⚙ Command Execution
 
-We are obviously going to talk about how to execute PostgreSql commands.
+We are obviously going to talk about how to execute `NpgsqlCommand` definitions.
 
 <details> 
 <summary><code>queryAsyncSeq</code></summary>
@@ -806,7 +806,7 @@ PostgreSqlCommand.text "SELECT NUL;"
 
 Output:
 ```txt
-Some 42L
+Some 42
 None
 ```
 
@@ -830,7 +830,7 @@ PostgreSqlCommand.text "SELECT 42;"
 |> PostgreSqlCommand.executeScalarOrNoneSync<int32> connection
 |> printfn "%A"
 
-PostgreSqlCommand.text "SELECT NUL;"
+PostgreSqlCommand.text "SELECT NULL;"
 |> PostgreSqlCommand.executeScalarOrNoneSync<int32> connection
 |> printfn "%A"
 0
@@ -838,7 +838,7 @@ PostgreSqlCommand.text "SELECT NUL;"
 
 Output:
 ```txt
-Some 42L
+Some 42
 None
 ```
 
@@ -900,14 +900,14 @@ The module to handle options and results in parameters.
 
 Example:
 ```fsharp
-[ "a", PostgreSqlNullDbValue.ifNone Integer (Some 42L)
+[ "a", PostgreSqlNullDbValue.ifNone Integer (Some 42)
   "b", PostgreSqlNullDbValue.ifNone Integer (None) ]
 |> printfn "%A"
 ```
 
 Output:
 ```txt
-[("a", Integer 42L); ("b", Null)]
+[("a", Integer 42); ("b", Null)]
 ```
 
 </details>
@@ -919,21 +919,21 @@ Output:
 
 Example:
 ```fsharp
-[ "a", PostgreSqlNullDbValue.ifError Integer (Ok 42L)
+[ "a", PostgreSqlNullDbValue.ifError Integer (Ok 42)
   "b", PostgreSqlNullDbValue.ifError Integer (Error "meh") ]
 |> printfn "%A"
 ```
 
 Output:
 ```txt
-[("a", Integer 42L); ("b", Null)]
+[("a", Integer 42); ("b", Null)]
 ```
 
 </details>
 
 ## 🚄 `PostgreSqlTransaction`: Transaction Helpers
 
-This is the main module to interact with `PostgreSqlTransaction`.
+This is the main module to interact with `NpgsqlTransaction`.
 
 📝 Note: The default isolation level is [`ReadCommitted`](https://docs.microsoft.com/en-us/dotnet/api/system.data.isolationlevel).
 
@@ -952,19 +952,19 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commit (CancellationToken.None) (IsolationLevel.ReadCommitted) connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
     return!
-        PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+        PostgreSqlCommand.text $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.executeScalar<int32> connection
 })
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -973,8 +973,8 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 
 Output:
 ```txt
-1L
-1L
+1
+1
 ```
 
 </details>
@@ -994,17 +994,17 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commitSync (IsolationLevel.ReadCommitted) connection (fun connection _ ->
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    PostgreSqlCommand.text $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.executeScalarSync<int32> connection
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1012,8 +1012,8 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 
 Output:
 ```txt
-1L
-1L
+1
+1
 ```
 
 </details>
@@ -1033,20 +1033,20 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.notCommit (CancellationToken.None) (IsolationLevel.ReadCommitted) connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);" 
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);" 
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
     return!
-        $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+        $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeScalar<int32> connection
 })
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1055,8 +1055,8 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 
 Output:
 ```txt
-1L
-0L
+1
+0
 ```
 
 </details>
@@ -1076,18 +1076,18 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.notCommitSync (IsolationLevel.ReadCommitted) connection (fun connection _ -> 
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);" 
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);" 
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeNonQuery connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeScalarSync<int32> connection
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1095,8 +1095,8 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 
 Output:
 ```txt
-1L
-0L
+1
+0
 ```
 
 </details>
@@ -1118,12 +1118,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commitOnSome (CancellationToken.None) (IsolationLevel.ReadCommitted) connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
-    do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    do! $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
@@ -1132,7 +1132,7 @@ PostgreSqlTransaction.commitOnSome (CancellationToken.None) (IsolationLevel.Read
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1142,7 +1142,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 1:
 ```txt
 Some 42
-1L
+1
 ```
 
 Example 2:
@@ -1153,12 +1153,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commitOnSome (CancellationToken.None) (IsolationLevel.ReadCommitted) connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
-    do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';" 
+    do! $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';" 
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
@@ -1167,7 +1167,7 @@ PostgreSqlTransaction.commitOnSome (CancellationToken.None) (IsolationLevel.Read
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1177,7 +1177,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 2:
 ```txt
 None
-0L
+0
 ```
 
 </details>
@@ -1199,12 +1199,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commitOnSomeSync (IsolationLevel.ReadCommitted) connection (fun connection _ -> 
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
@@ -1212,7 +1212,7 @@ PostgreSqlTransaction.commitOnSomeSync (IsolationLevel.ReadCommitted) connection
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1221,7 +1221,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 1:
 ```txt
 Some 42
-1L
+1
 ```
 
 Example 2:
@@ -1232,12 +1232,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commitOnSomeSync (IsolationLevel.ReadCommitted) connection (fun connection _ ->
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';" 
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';" 
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
@@ -1245,7 +1245,7 @@ PostgreSqlTransaction.commitOnSomeSync (IsolationLevel.ReadCommitted) connection
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1254,7 +1254,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 2:
 ```txt
 None
-0L
+0
 ```
 
 </details>
@@ -1276,12 +1276,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commitOnOk (CancellationToken.None) (IsolationLevel.ReadCommitted) connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
-    do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    do! $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
@@ -1290,7 +1290,7 @@ PostgreSqlTransaction.commitOnOk (CancellationToken.None) (IsolationLevel.ReadCo
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1300,7 +1300,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 1:
 ```txt
 Ok 42
-1L
+1
 ```
 
 Example 2:
@@ -1311,12 +1311,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commitOnOk (CancellationToken.None) (IsolationLevel.ReadCommitted) connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
-    do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    do! $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
@@ -1325,7 +1325,7 @@ PostgreSqlTransaction.commitOnOk (CancellationToken.None) (IsolationLevel.ReadCo
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1335,7 +1335,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 2:
 ```txt
 Error "fail"
-0L
+0
 ```
 
 </details>
@@ -1357,12 +1357,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commitOnOkSync (IsolationLevel.ReadCommitted) connection (fun connection _ ->
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
@@ -1370,7 +1370,7 @@ PostgreSqlTransaction.commitOnOkSync (IsolationLevel.ReadCommitted) connection (
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1379,7 +1379,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 1:
 ```txt
 Ok 42
-1L
+1
 ```
 
 Example 2:
@@ -1390,12 +1390,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.commitOnOkSync (IsolationLevel.ReadCommitted) connection (fun connection _ ->
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
@@ -1403,7 +1403,7 @@ PostgreSqlTransaction.commitOnOkSync (IsolationLevel.ReadCommitted) connection (
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1412,7 +1412,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 2:
 ```txt
 Error "fail"
-0L
+0
 ```
 
 </details>
@@ -1432,19 +1432,19 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommit connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
     return!
-        PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+        PostgreSqlCommand.text $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.executeScalar<int32> connection
 })
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1453,8 +1453,8 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 
 Output:
 ```txt
-1L
-1L
+1
+1
 ```
 
 </details>
@@ -1474,17 +1474,17 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommitSync connection (fun connection _ ->
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    PostgreSqlCommand.text $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    PostgreSqlCommand.text $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.executeScalarSync<int32> connection
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1492,8 +1492,8 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 
 Output:
 ```txt
-1L
-1L
+1
+1
 ```
 
 </details>
@@ -1513,20 +1513,20 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultNotCommit connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);" 
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);" 
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
     return!
-        $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+        $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeScalar<int32> connection
 })
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1535,8 +1535,8 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 
 Output:
 ```txt
-1L
-0L
+1
+0
 ```
 
 </details>
@@ -1556,18 +1556,18 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultNotCommitSync connection (fun connection _ -> 
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);" 
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);" 
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeNonQuery connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeScalarSync<int32> connection
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1575,8 +1575,8 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 
 Output:
 ```txt
-1L
-0L
+1
+0
 ```
 
 </details>
@@ -1598,12 +1598,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommitOnSome connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
-    do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    do! $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
@@ -1612,7 +1612,7 @@ PostgreSqlTransaction.defaultCommitOnSome connection (fun connection _ -> async 
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1622,7 +1622,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 1:
 ```txt
 Some 42
-1L
+1
 ```
 
 Example 2:
@@ -1633,12 +1633,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommitOnSome connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
-    do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';" 
+    do! $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';" 
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
@@ -1647,7 +1647,7 @@ PostgreSqlTransaction.defaultCommitOnSome connection (fun connection _ -> async 
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1657,7 +1657,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 2:
 ```txt
 None
-0L
+0
 ```
 
 </details>
@@ -1679,12 +1679,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommitOnSomeSync connection (fun connection _ -> 
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
@@ -1692,7 +1692,7 @@ PostgreSqlTransaction.defaultCommitOnSomeSync connection (fun connection _ ->
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1701,7 +1701,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 1:
 ```txt
 Some 42
-1L
+1
 ```
 
 Example 2:
@@ -1712,12 +1712,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommitOnSomeSync connection (fun connection _ ->
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';" 
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';" 
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
@@ -1725,7 +1725,7 @@ PostgreSqlTransaction.defaultCommitOnSomeSync connection (fun connection _ ->
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1734,7 +1734,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 2:
 ```txt
 None
-0L
+0
 ```
 
 </details>
@@ -1756,12 +1756,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommitOnOk connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
-    do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    do! $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
@@ -1770,7 +1770,7 @@ PostgreSqlTransaction.defaultCommitOnOk connection (fun connection _ -> async {
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1780,7 +1780,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 1:
 ```txt
 Ok 42
-1L
+1
 ```
 
 Example 2:
@@ -1791,12 +1791,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommitOnOk connection (fun connection _ -> async {
-    do! $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    do! $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
         |> PostgreSqlCommand.text 
         |> PostgreSqlCommand.executeNonQuery connection
         |> Async.Ignore
 
-    do! $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    do! $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
         |> PostgreSqlCommand.text
         |> PostgreSqlCommand.executeScalar<int32> connection
         |> Async.Ignore
@@ -1805,7 +1805,7 @@ PostgreSqlTransaction.defaultCommitOnOk connection (fun connection _ -> async {
 |> Async.RunSynchronously
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalar<int32> connection
 |> Async.RunSynchronously
@@ -1815,7 +1815,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 2:
 ```txt
 Error "fail"
-0L
+0
 ```
 
 </details>
@@ -1837,12 +1837,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommitOnOkSync connection (fun connection _ ->
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
@@ -1850,7 +1850,7 @@ PostgreSqlTransaction.defaultCommitOnOkSync connection (fun connection _ ->
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1859,7 +1859,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 1:
 ```txt
 Ok 42
-1L
+1
 ```
 
 Example 2:
@@ -1870,12 +1870,12 @@ use connection = new NpgsqlConnection("Host=localhost;Database=my_database;User 
 connection.Open()
 
 PostgreSqlTransaction.defaultCommitOnOkSync connection (fun connection _ ->
-    $"CREATE TABLE {tableName} (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL);"
+    $"CREATE TABLE {tableName} (id SERIAL PRIMARY KEY, name TEXT NOT NULL);"
     |> PostgreSqlCommand.text 
     |> PostgreSqlCommand.executeNonQuerySync connection
     |> ignore
 
-    $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+    $"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
     |> PostgreSqlCommand.text
     |> PostgreSqlCommand.executeScalarSync<int32> connection
     |> ignore
@@ -1883,7 +1883,7 @@ PostgreSqlTransaction.defaultCommitOnOkSync connection (fun connection _ ->
 )
 |> printfn "%A"
 
-$"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName}';"
+$"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = N'{tableName}';"
 |> PostgreSqlCommand.text 
 |> PostgreSqlCommand.executeScalarSync<int32> connection
 |> printfn "%A"
@@ -1892,7 +1892,7 @@ $"SELECT COUNT(*) FROM PostgreSql_master WHERE type='table' AND name='{tableName
 Output 2:
 ```txt
 Error "fail"
-0L
+0
 ```
 
 </details>

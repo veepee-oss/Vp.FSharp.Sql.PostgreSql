@@ -18,14 +18,16 @@ open Vp.FSharp.Sql
 /// and https://stackoverflow.com/a/845472/4636721
 type PostgreSqlDbValue =
     | Null
-    | Bit of bool
-    | Boolean of bool
+
+    | Bit      of bool
+    | Boolean  of bool
+
     | SmallInt of int16
-    | Integer of int32
-    | Oid of uint32
-    | Xid of uint32
-    | Cid of uint32
-    | BigInt of int64
+    | Integer  of int32
+    | Oid      of uint32
+    | Xid      of uint32
+    | Cid      of uint32
+    | BigInt   of int64
 
     | Real of single
     | Double of double
@@ -106,18 +108,33 @@ type PostgreSqlDependencies =
 [<AbstractClass; Sealed>]
 type internal Constants private () =
 
+    static let beginTransactionAsync
+        (connection: NpgsqlConnection) (isolationLevel: IsolationLevel) (cancellationToken: CancellationToken) =
+        connection.BeginTransactionAsync(isolationLevel, cancellationToken)
+
+    static let deps : PostgreSqlDependencies =
+          { CreateCommand = fun connection -> connection.CreateCommand()
+            SetCommandTransaction = fun command transaction -> command.Transaction <- transaction
+            BeginTransaction = fun connection -> connection.BeginTransaction
+            BeginTransactionAsync = beginTransactionAsync
+            ExecuteReader = fun command -> command.ExecuteReader(CommandBehavior.Default)
+            ExecuteReaderAsync = fun command -> command.ExecuteReaderAsync
+            DbValueToParameter = Constants.DbValueToParameter }
+
     static member DbValueToParameter name value =
         let parameter = NpgsqlParameter()
         parameter.ParameterName <- name
         match value with
         | Null ->
             parameter.Value <- DBNull.Value
+
         | Bit value ->
             parameter.Value <- value
             parameter.NpgsqlDbType <- NpgsqlDbType.Bit
         | Boolean value ->
             parameter.Value <- value
             parameter.NpgsqlDbType <- NpgsqlDbType.Boolean
+
         | SmallInt value ->
             parameter.Value <- value
             parameter.NpgsqlDbType <- NpgsqlDbType.Smallint
@@ -257,15 +274,4 @@ type internal Constants private () =
             parameter.Value <- value
         parameter
 
-    static member Deps : PostgreSqlDependencies =
-        let beginTransactionAsync
-            (connection: NpgsqlConnection) (isolationLevel: IsolationLevel) (cancellationToken: CancellationToken) =
-            connection.BeginTransactionAsync(isolationLevel, cancellationToken)
-
-        { CreateCommand = fun connection -> connection.CreateCommand()
-          SetCommandTransaction = fun command transaction -> command.Transaction <- transaction
-          BeginTransaction = fun connection -> connection.BeginTransaction
-          BeginTransactionAsync = beginTransactionAsync
-          ExecuteReader = fun command -> command.ExecuteReader(CommandBehavior.Default)
-          ExecuteReaderAsync = fun command -> command.ExecuteReaderAsync
-          DbValueToParameter = Constants.DbValueToParameter}
+    static member Deps = deps

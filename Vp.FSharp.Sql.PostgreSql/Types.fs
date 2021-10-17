@@ -76,6 +76,8 @@ type PostgreSqlDbValue =
     /// Only if the relevant Npgsql mapping for the Enum has been set up beforehand.
     /// See: https://www.npgsql.org/doc/types/enums_and_composites.html
     | Enum of Enum
+    
+    | Custom of (NpgsqlDbType * obj)
 
 type PostgreSqlCommandDefinition =
     CommandDefinition<
@@ -249,6 +251,9 @@ type internal Constants private () =
             parameter.Value <- value
             parameter.NpgsqlDbType <- NpgsqlDbType.Jsonb
         | Enum value ->
+            parameter.Value <- value
+        | Custom (dbType, value) ->
+            parameter.NpgsqlDbType <- dbType
             parameter.Value <- value
         parameter
 

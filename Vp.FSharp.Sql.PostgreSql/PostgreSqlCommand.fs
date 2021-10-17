@@ -44,61 +44,61 @@ let transaction value (commandDefinition: PostgreSqlCommandDefinition) : Postgre
 /// This function runs asynchronously.
 let queryAsyncSeq connection read (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.queryAsyncSeq
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read commandDefinition
 
 /// Execute the command and return the sets of rows as an AsyncSeq accordingly to the command definition.
 /// This function runs synchronously.
 let querySeqSync connection read (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.querySeqSync
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read commandDefinition
 
 /// Execute the command and return the sets of rows as a list accordingly to the command definition.
 /// This function runs asynchronously.
 let queryList connection read (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.queryList
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read commandDefinition
 
 /// Execute the command and return the sets of rows as a list accordingly to the command definition.
 /// This function runs synchronously.
 let queryListSync connection read (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.queryListSync
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read commandDefinition
 
 /// Execute the command and return the first set of rows as a list accordingly to the command definition.
 /// This function runs asynchronously.
 let querySetList connection read (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.querySetList
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read commandDefinition
 
 /// Execute the command and return the first set of rows as a list accordingly to the command definition.
 /// This function runs synchronously.
 let querySetListSync connection read (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.querySetListSync
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read commandDefinition
 
 /// Execute the command and return the 2 first sets of rows as a tuple of 2 lists accordingly to the command definition.
 /// This function runs asynchronously.
 let querySetList2 connection read1 read2 (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.querySetList2
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read1 read2 commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read1 read2 commandDefinition
 
 /// Execute the command and return the 2 first sets of rows as a tuple of 2 lists accordingly to the command definition.
 /// This function runs synchronously.
 let querySetList2Sync connection read1 read2 (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.querySetList2Sync
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read1 read2 commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read1 read2 commandDefinition
 
 /// Execute the command and return the 3 first sets of rows as a tuple of 3 lists accordingly to the command definition.
 /// This function runs asynchronously.
 let querySetList3 connection read1 read2 read3 (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.querySetList3
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read1 read2 read3 commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read1 read2 read3 commandDefinition
 
 /// Execute the command and return the 3 first sets of rows as a tuple of 3 lists accordingly to the command definition.
 /// This function runs synchronously.
 let querySetList3Sync  connection read1 read2 read3 (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.querySetList3Sync
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) read1 read2 read3 commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot read1 read2 read3 commandDefinition
 
 /// Execute the command accordingly to its definition and,
 /// - return the first cell value, if it is available and of the given type.
@@ -106,7 +106,7 @@ let querySetList3Sync  connection read1 read2 read3 (commandDefinition: PostgreS
 /// This function runs asynchronously.
 let executeScalar<'Scalar> connection (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.executeScalar<'Scalar, _, _, _, _, _, _, _, _>
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot commandDefinition
 
 /// Execute the command accordingly to its definition and,
 /// - return the first cell value, if it is available and of the given type.
@@ -114,7 +114,7 @@ let executeScalar<'Scalar> connection (commandDefinition: PostgreSqlCommandDefin
 /// This function runs synchronously.
 let executeScalarSync<'Scalar> connection (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.executeScalarSync<'Scalar, _, _, _, _, _, _, _, _>
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot commandDefinition
 
 /// Execute the command accordingly to its definition and,
 /// - return Some, if the first cell is available and of the given type.
@@ -123,7 +123,7 @@ let executeScalarSync<'Scalar> connection (commandDefinition: PostgreSqlCommandD
 /// This function runs asynchronously.
 let executeScalarOrNone<'Scalar> connection (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.executeScalarOrNone<'Scalar, _, _, _, _, _, _, _, _>
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot commandDefinition
 
 /// Execute the command accordingly to its definition and,
 /// - return Some, if the first cell is available and of the given type.
@@ -132,16 +132,16 @@ let executeScalarOrNone<'Scalar> connection (commandDefinition: PostgreSqlComman
 /// This function runs synchronously.
 let executeScalarOrNoneSync<'Scalar> connection (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.executeScalarOrNoneSync<'Scalar, _, _, _, _, _, _, _, _>
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot commandDefinition
 
 /// Execute the command accordingly to its definition and, return the number of rows affected.
 /// This function runs asynchronously.
 let executeNonQuery connection (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.executeNonQuery
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot commandDefinition
 
 /// Execute the command accordingly to its definition and, return the number of rows affected.
 /// This function runs synchronously.
 let executeNonQuerySync connection (commandDefinition: PostgreSqlCommandDefinition) =
     SqlCommand.executeNonQuerySync
-        connection (Constants.Deps) (PostgreSqlConfiguration.Snapshot) commandDefinition
+        connection Constants.Deps PostgreSqlConfiguration.Snapshot commandDefinition

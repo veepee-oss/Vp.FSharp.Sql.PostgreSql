@@ -96,6 +96,8 @@ type PostgreSqlDbValue =
     /// Only if the relevant Npgsql mapping for the Enum has been set up beforehand.
     /// See: https://www.npgsql.org/doc/types/enums_and_composites.html
     | Enum of Enum
+    
+    | Custom of (NpgsqlDbType * obj)
 ```
 
 ## 🧱`PostgreSqlCommand`
@@ -224,6 +226,9 @@ Output:
 ```txt
 84.0
 ```
+
+Note: in case you want to pass some types that aren't yet supported by the library,  
+you can use the `Custom` DU case which allows you to pass whatever underlying `NpgsqlDbType` with the relevant `obj` value.
 
 </details>
 

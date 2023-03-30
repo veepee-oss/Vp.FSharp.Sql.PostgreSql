@@ -13,6 +13,25 @@ open NpgsqlTypes
 open Vp.FSharp.Sql
 
 
+type ArrayOf =
+    | Uuid
+    | Integer
+    | Text
+    | Varchar
+    | Boolean
+    | Char
+    | Date
+    | Double
+    | Money
+    | Numeric
+    | SmallInt
+    | BigInt
+    | Bit
+    | Time
+    | Timestamp
+    | TimestampTz
+    | TimeTz
+
 /// Native PostgreSQL DB types.
 /// See https://www.npgsql.org/doc/types/basic.html
 /// and https://stackoverflow.com/a/845472/4636721
@@ -267,8 +286,10 @@ type internal Constants private () =
         | Jsonb value ->
             parameter.Value <- value
             parameter.NpgsqlDbType <- NpgsqlDbType.Jsonb
+
         | Enum value ->
             parameter.Value <- value
+
         | Custom (dbType, value) ->
             parameter.NpgsqlDbType <- dbType
             parameter.Value <- value

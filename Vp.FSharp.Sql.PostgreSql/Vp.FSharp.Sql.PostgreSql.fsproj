@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <Compile Include="Types.fs" />
+    <Compile Include="PostgreSqlArrayDbValue.fs" />
     <Compile Include="PostgreSqlNullDbValue.fs" />
     <Compile Include="PostgreSqlCommand.fs" />
     <Compile Include="PostgreSqlTransaction.fs" />

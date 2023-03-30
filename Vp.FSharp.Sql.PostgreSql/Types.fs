@@ -12,26 +12,6 @@ open NpgsqlTypes
 
 open Vp.FSharp.Sql
 
-
-type ArrayOf =
-    | Uuid
-    | Integer
-    | Text
-    | Varchar
-    | Boolean
-    | Char
-    | Date
-    | Double
-    | Money
-    | Numeric
-    | SmallInt
-    | BigInt
-    | Bit
-    | Time
-    | Timestamp
-    | TimestampTz
-    | TimeTz
-
 /// Native PostgreSQL DB types.
 /// See https://www.npgsql.org/doc/types/basic.html
 /// and https://stackoverflow.com/a/845472/4636721

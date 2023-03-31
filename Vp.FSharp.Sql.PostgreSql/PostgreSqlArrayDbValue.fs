@@ -5,9 +5,14 @@ open NpgsqlTypes
 open Vp.FSharp.Sql.PostgreSql
 
 
-let toArray dbType =
-    let tuple2 a b = (a, b)
-    List.toArray
-    >> (fun v -> v :> obj)
-    >> tuple2 (NpgsqlDbType.Array ||| dbType)
-    >> Custom
+let inline private array dbType v =
+    (NpgsqlDbType.Array ||| dbType, v :> obj) |> Custom
+
+let inline ofArray<'a> dbType (values: 'a []) =
+    array dbType values
+
+let inline ofList<'a> dbType (values: 'a list) =
+    array dbType values
+
+let inline ofSeq<'a> dbType (values: 'a seq) =
+    array dbType values

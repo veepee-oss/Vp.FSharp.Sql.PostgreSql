@@ -19,15 +19,15 @@ open Vp.FSharp.Sql
 type PostgreSqlDbValue =
     | Null
 
-    | Bit      of bool
-    | Boolean  of bool
+    | Bit of bool
+    | Boolean of bool
 
     | SmallInt of int16
-    | Integer  of int32
-    | Oid      of uint32
-    | Xid      of uint32
-    | Cid      of uint32
-    | BigInt   of int64
+    | Integer of int32
+    | Oid of uint32
+    | Xid of uint32
+    | Cid of uint32
+    | BigInt of int64
 
     | Real of single
     | Double of double
@@ -78,55 +78,43 @@ type PostgreSqlDbValue =
     /// Only if the relevant Npgsql mapping for the Enum has been set up beforehand.
     /// See: https://www.npgsql.org/doc/types/enums_and_composites.html
     | Enum of Enum
-
-    | Custom of (NpgsqlDbType * obj)
+    | Array of NpgsqlDbType * Array
+    | Custom of NpgsqlDbType * obj
 
 type PostgreSqlCommandDefinition =
-    CommandDefinition<
-        NpgsqlConnection,
-        NpgsqlCommand,
-        NpgsqlParameter,
-        NpgsqlDataReader,
-        NpgsqlTransaction,
-        PostgreSqlDbValue>
+    CommandDefinition<NpgsqlConnection, NpgsqlCommand, NpgsqlParameter, NpgsqlDataReader, NpgsqlTransaction, PostgreSqlDbValue>
 
-type PostgreSqlConfiguration =
-    SqlConfigurationCache<
-        NpgsqlConnection,
-        NpgsqlCommand>
+type PostgreSqlConfiguration = SqlConfigurationCache<NpgsqlConnection, NpgsqlCommand>
 
 type PostgreSqlDependencies =
-    SqlDependencies<
-        NpgsqlConnection,
-        NpgsqlCommand,
-        NpgsqlParameter,
-        NpgsqlDataReader,
-        NpgsqlTransaction,
-        PostgreSqlDbValue>
+    SqlDependencies<NpgsqlConnection, NpgsqlCommand, NpgsqlParameter, NpgsqlDataReader, NpgsqlTransaction, PostgreSqlDbValue>
 
 
 [<AbstractClass; Sealed>]
 type internal Constants private () =
 
     static let beginTransactionAsync
-        (connection: NpgsqlConnection) (isolationLevel: IsolationLevel) (cancellationToken: CancellationToken) =
+        (connection: NpgsqlConnection)
+        (isolationLevel: IsolationLevel)
+        (cancellationToken: CancellationToken)
+        =
         connection.BeginTransactionAsync(isolationLevel, cancellationToken)
 
-    static let deps : PostgreSqlDependencies =
-          { CreateCommand = fun connection -> connection.CreateCommand()
-            SetCommandTransaction = fun command transaction -> command.Transaction <- transaction
-            BeginTransaction = fun connection -> connection.BeginTransaction
-            BeginTransactionAsync = beginTransactionAsync
-            ExecuteReader = fun command -> command.ExecuteReader(CommandBehavior.Default)
-            ExecuteReaderAsync = fun command -> command.ExecuteReaderAsync
-            DbValueToParameter = Constants.DbValueToParameter }
+    static let deps: PostgreSqlDependencies =
+        { CreateCommand = fun connection -> connection.CreateCommand()
+          SetCommandTransaction = fun command transaction -> command.Transaction <- transaction
+          BeginTransaction = fun connection -> connection.BeginTransaction
+          BeginTransactionAsync = beginTransactionAsync
+          ExecuteReader = fun command -> command.ExecuteReader(CommandBehavior.Default)
+          ExecuteReaderAsync = fun command -> command.ExecuteReaderAsync
+          DbValueToParameter = Constants.DbValueToParameter }
 
     static member DbValueToParameter name value =
         let parameter = NpgsqlParameter()
         parameter.ParameterName <- name
+
         match value with
-        | Null ->
-            parameter.Value <- DBNull.Value
+        | Null -> parameter.Value <- DBNull.Value
 
         | Bit value ->
             parameter.Value <- value
@@ -267,11 +255,14 @@ type internal Constants private () =
         | Jsonb value ->
             parameter.Value <- value
             parameter.NpgsqlDbType <- NpgsqlDbType.Jsonb
-        | Enum value ->
+        | Enum value -> parameter.Value <- value
+        | Array (dbType, value) ->
+            parameter.NpgsqlDbType <- NpgsqlDbType.Array ||| dbType
             parameter.Value <- value
         | Custom (dbType, value) ->
             parameter.NpgsqlDbType <- dbType
             parameter.Value <- value
+
         parameter
 
     static member Deps = deps

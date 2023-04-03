@@ -81,6 +81,11 @@ type PostgreSqlDbValue =
     | Array of NpgsqlDbType * Array
     | Custom of NpgsqlDbType * obj
 
+
+module PostgreSqlDbValue =
+    let Array<'T> (dbType, source: 'T array) = PostgreSqlDbValue.Array(dbType, source)
+
+
 type PostgreSqlCommandDefinition =
     CommandDefinition<NpgsqlConnection, NpgsqlCommand, NpgsqlParameter, NpgsqlDataReader, NpgsqlTransaction, PostgreSqlDbValue>
 

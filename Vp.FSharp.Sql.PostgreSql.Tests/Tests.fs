@@ -1,9 +1,7 @@
 module Tests
 
-open NpgsqlTypes
-open Vp.FSharp.Sql.PostgreSql
-open Xunit
 
+open Xunit
 
 [<Fact>]
 let ``My test`` () =

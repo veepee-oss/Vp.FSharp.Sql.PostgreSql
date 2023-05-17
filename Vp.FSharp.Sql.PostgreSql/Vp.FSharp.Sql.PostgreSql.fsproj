@@ -24,7 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="5.0.1.1" />
+    <PackageReference Include="Npgsql" Version="6.0.0" />
     <PackageReference Include="Vp.FSharp.Sql" Version="1.0.47" />
   </ItemGroup>
 
